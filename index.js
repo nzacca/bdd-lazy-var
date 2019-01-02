@@ -573,10 +573,14 @@ function optional(name) { try { return require(name) } catch(e) {} }
     ['', 'x', 'f'].forEach(function (prefix) {
       var describeKey = prefix + 'describe';
       var itKey = prefix + 'it';
+      const originalIt = context[itKey];
+      const originalDescribe = context[describeKey];
 
-      context[itKey + 's'] = wrapIts(context[itKey]);
-      context[itKey] = wrapIt(context[itKey], isJest);
-      context[describeKey] = tracker.wrapSuite(context[describeKey]);
+      context[itKey + 's'] = wrapIts(originalIt);
+      context[itKey] = wrapIt(originalIt, isJest);
+      Object.keys(originalIt).forEach(key => { context[itKey][key] = originalIt[key]; });
+      context[describeKey] = tracker.wrapSuite(originalDescribe);
+      Object.keys(originalDescribe).forEach(key => { context[describeKey][key] = originalDescribe[key]; });
       context[prefix + 'context'] = context[describeKey];
     });
     context.afterEach(tracker.cleanUpCurrentContext);
